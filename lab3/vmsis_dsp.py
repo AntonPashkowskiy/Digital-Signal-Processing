@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import numpy as np
 from functools import partial
+from math import trunc, log
 
 
 def fft(x, inverse=False):
@@ -73,6 +74,59 @@ def fold_fft(x, y):
     factors_z = np.multiply(factors_x, factors_y)
 
     return [element.real for element in ifft(factors_z)]
+
+
+def fwt(x, *, is_inverse=False):
+    length = len(x)
+
+    if length == 1:
+        return x
+
+    left = np.zeros(length // 2)
+    right = np.zeros(length // 2)
+
+    for index in range(length // 2):
+        left[index] = x[index] + x[index + length // 2]
+        right[index] = x[index] - x[index + length // 2]
+
+    sub_left = fwt(left, is_inverse=is_inverse)
+    sub_right = fwt(right, is_inverse=is_inverse)
+
+    result = np.empty(length)
+    divider = 1 if is_inverse else 2
+    
+    for index in range(length // 2):
+        result[index] = sub_left[index] / divider
+        result[index + length // 2] = sub_right[index] / divider
+
+    return result
+
+
+def dwt(x, *, is_inverse=False):
+    length = len(x)
+
+    if not log(length, 2).is_integer():
+        raise ArithmeticError("Number of doters must be a power of two")
+
+    divider = 1. if is_inverse else 2.
+    hadamard_matrix = create_hadamard_matrix(length)
+
+    return np.dot(hadamard_matrix, x) / divider ** log(length, 2)
+
+
+def create_hadamard_matrix(n):
+    power = log(n, 2)
+
+    if not power.is_integer():
+        raise ArithmeticError("Number must be a power of two")
+
+    h = np.array([ [1, 1], [1, -1] ])
+    hadamard_matrix = np.kron(h, h)
+    
+    for i in range(1, int(power) - 1):
+        hadamard_matrix = np.kron(hadamard_matrix, h)
+
+    return hadamard_matrix
 
 
 def main():
