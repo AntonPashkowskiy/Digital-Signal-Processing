@@ -89,15 +89,15 @@ def fwt(x, *, is_inverse=False):
         left[index] = x[index] + x[index + length // 2]
         right[index] = x[index] - x[index + length // 2]
 
-    sub_left = fwt(left, is_inverse=is_inverse)
-    sub_right = fwt(right, is_inverse=is_inverse)
+    left_result = fwt(left, is_inverse=is_inverse)
+    right_result = fwt(right, is_inverse=is_inverse)
 
     result = np.empty(length)
     divider = 1 if is_inverse else 2
     
     for index in range(length // 2):
-        result[index] = sub_left[index] / divider
-        result[index + length // 2] = sub_right[index] / divider
+        result[index] = left_result[index] / divider
+        result[index + length // 2] = right_result[index] / divider
 
     return result
 
@@ -120,13 +120,13 @@ def create_hadamard_matrix(n):
     if not power.is_integer():
         raise ArithmeticError("Number must be a power of two")
 
-    h = np.array([ [1, 1], [1, -1] ])
-    hadamard_matrix = np.kron(h, h)
+    hadamard_matrix_1 = np.array([ [1, 1], [1, -1] ])
+    hadamard_matrix_n = np.kron(hadamard_matrix_1, hadamard_matrix_1)
     
     for i in range(1, int(power) - 1):
-        hadamard_matrix = np.kron(hadamard_matrix, h)
+        hadamard_matrix_n = np.kron(hadamard_matrix_n, hadamard_matrix_1)
 
-    return hadamard_matrix
+    return hadamard_matrix_n
 
 
 def main():
