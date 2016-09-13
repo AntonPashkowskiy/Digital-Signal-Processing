@@ -4,6 +4,7 @@ import image_filters
 import configparser
 import glob
 import os
+import image_histogram
 
 
 def get_settings():
@@ -40,15 +41,18 @@ def main():
 
         for input_file_path in glob.glob(file_template):
             image = Image.open(input_file_path)
+
             image_bi = image_item_processing.brightness_increase(image, settings)
             image_bd = image_item_processing.brightness_decrease(image, settings)
             image_pf = image_filters.previtts_filter(image)
+
             image_bi.save(output_path(settings, input_file_path, '_bi'))
             image_bd.save(output_path(settings, input_file_path, '_bd'))
             image_pf.save(output_path(settings, input_file_path, '_pf'))
 
+            image_histogram.show_histograms(image, image_bd, image_bi, image_pf)
     except Exception as ex:
-        raise ex
+        print(ex)
 
 
 if __name__ == '__main__':

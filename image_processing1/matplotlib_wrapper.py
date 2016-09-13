@@ -32,6 +32,13 @@ class _MatplotlibSubplotsPainter(metaclass=abc.ABCMeta):
 
         pass
 
+    @abc.abstractmethod
+    def show(self):
+        """ Should show graphic.
+        """
+
+        pass
+
 
 class HistogramPainter(_MatplotlibSubplotsPainter):
     """ Specific matplotlib histogram painter.
@@ -64,8 +71,6 @@ class HistogramPainter(_MatplotlibSubplotsPainter):
 
         self.__current_position += 1
 
-        pass
-
     @property
     def current_position(self):
         return self.__current_position
@@ -77,6 +82,44 @@ class HistogramPainter(_MatplotlibSubplotsPainter):
         plt.tight_layout()
         plt.show()
 
+
+class BarChartPainter(_MatplotlibSubplotsPainter):
+    """ Specific matplotlib bar chart painter.
+    """
+
+    def __init__(self, description, grid_size):
+        """ Initialize bar chart painter.
+        """
+
+        self.__current_position = 0
+        super().__init__(description, grid_size)
+
+    def append_plot(self, description, data, *args, **kwargs):
+        """
+        Initialize bar chart with data and set them on the grid.
+
+        You can customize drawing plot with special positional and keywords arguments.
+        For find information about arguments see matplotlib documentation:
+        http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.bar
+        """
+
+        if self.__current_position >= self._width * self._height:
+            raise OverflowError("Overflowing grid.")
+
+        plot = self._subplots[self.__current_position]
+
+        plot.grid()
+        plot.set_title(str(description))
+        plot.bar(range(len(data)), data, *args, **kwargs)
+
+        self.__current_position += 1
+
+    def show(self):
+        """ Display figure.
+        """
+
+        plt.tight_layout()
+        plt.show()
 
 if __name__ == '__main__':
     # Example of using HistogramPainter
